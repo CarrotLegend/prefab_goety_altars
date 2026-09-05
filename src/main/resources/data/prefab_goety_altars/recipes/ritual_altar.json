@@ -1,0 +1,23 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "MPM",
+        "PDP",
+        "MPM"
+    ],
+    "key": {
+        "D": {
+            "tag": "goety:dark_altars"
+        },
+        "P": {
+            "tag": "goety:pedestals"
+        },
+        "M": {
+            "item": "goety:magic_emerald"
+        }
+    },
+    "result": {
+        "item": "prefab_goety_altars:ritual_altar",
+        "count": 1
+    }
+}

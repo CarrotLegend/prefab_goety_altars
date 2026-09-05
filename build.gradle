@@ -1,0 +1,125 @@
+plugins {
+    id 'eclipse'
+    id 'idea'
+    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
+}
+
+version = mod_version
+group = mod_group_id
+base { archivesName = mod_id }
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+
+sourceSets {
+    smoke {
+        resources.srcDir '.cache/scanner-fixtures'
+        compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
+        runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
+    }
+}
+def smoke = providers.gradleProperty('smoke').isPresent()
+def scannerSmoke = providers.gradleProperty('scannerSmoke').isPresent()
+def missingDependency = providers.gradleProperty('missingDependency').getOrElse('none')
+if (!(missingDependency in ['none', 'prefab', 'goety'])) {
+    throw new GradleException('missingDependency must be none, prefab, or goety')
+}
+if (missingDependency != 'none') {
+    configurations.runtimeClasspath.exclude(group: 'curse.maven', module: missingDependency == 'prefab' ? 'prefab-246550' : 'goety-586095')
+}
+
+minecraft {
+    mappings channel: 'official', version: minecraft_version
+    copyIdeResources = true
+    runs {
+        configureEach {
+            workingDirectory project.file(providers.gradleProperty('altarSmoke').isPresent() ? '.cache/altar-integration/run' : scannerSmoke && !providers.gradleProperty('scannerSourceSmoke').isPresent() ? '.cache/scanner-integration/run' : missingDependency == 'none' ? 'run' : "run/missing-${missingDependency}")
+            property 'forge.logging.console.level', 'info'
+            property 'file.encoding', 'UTF-8'
+            property 'altar.integrationSmoke', providers.gradleProperty('altarSmoke').isPresent().toString()
+            property 'altar.scannerSmoke', providers.gradleProperty('scannerSmoke').isPresent().toString()
+            property 'altar.scannerClasspathCheck', providers.gradleProperty('scannerClasspathCheck').isPresent().toString()
+            property 'altar.smokeProject', project.projectDir.absolutePath
+            property 'altar.scannerSourceSmoke', providers.gradleProperty('scannerSourceSmoke').isPresent().toString()
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${buildDir}/createSrgToMcp/output.srg"
+            mods { "${mod_id}" { source sourceSets.main } }
+            if (smoke) {
+                mods { prefab_goety_altars_smoke { source sourceSets.smoke } }
+            }
+        }
+        client {}
+        server { args '--nogui' }
+        data {
+            workingDirectory project.file('run-data')
+            args '--mod', mod_id, '--all', '--output', file('src/generated/resources/'),
+                    '--existing', file('src/main/resources/')
+        }
+    }
+}
+if (scannerSmoke) {
+    tasks.register('prepareScannerWorkspace') {
+        doLast {
+            def root = file('.cache/scanner-integration')
+            root.mkdirs()
+            new File(root, 'src/main/resources').mkdirs()
+            new File(root, 'build.gradle').text = '// Isolated scanner test workspace; not a distributable mod.\n'
+            new File(root, 'gradle.properties').text = 'mod_id=prefab_goety_altars\n'
+        }
+    }
+    tasks.matching { it.name == 'runClient' }.configureEach { dependsOn 'prepareScannerWorkspace' }
+}
+sourceSets.main.resources { srcDir 'src/generated/resources' }
+
+repositories {
+    ['revelationJar', 'endingLibraryJar'].each { propertyName ->
+        if (providers.gradleProperty(propertyName).isPresent()) {
+            flatDir {
+                dirs file(providers.gradleProperty(propertyName).get()).parentFile
+                content { includeGroup 'local.revelation' }
+            }
+        }
+    }
+    mavenCentral()
+    maven {
+        url = 'https://www.cursemaven.com'
+        content { includeGroup 'curse.maven' }
+    }
+    maven {
+        url = 'https://maven.theillusivec4.top/'
+        content { includeGroup 'top.theillusivec4.curios' }
+    }
+}
+
+dependencies {
+    minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+    implementation fg.deobf('curse.maven:prefab-246550:6065398')
+    implementation fg.deobf('curse.maven:goety-586095:8750818')
+    runtimeOnly fg.deobf('top.theillusivec4.curios:curios-forge:5.14.1+1.20.1')
+    // Explicit local runtime inputs only; neither dependency enters the distributable jar.
+    [revelationJar: '2.3.2', endingLibraryJar: '2.1.15fix'].each { propertyName, artifactVersion ->
+        if (providers.gradleProperty(propertyName).isPresent()) {
+            def runtimeFile = file(providers.gradleProperty(propertyName).get())
+            if (!runtimeFile.isFile() || !runtimeFile.name.endsWith('.jar')) {
+                throw new GradleException("${propertyName} must point to an existing jar")
+            }
+            runtimeOnly fg.deobf([group: 'local.revelation', name: runtimeFile.name[0..-5], version: artifactVersion])
+        }
+    }
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.11.0'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+test { useJUnitPlatform() }
+
+tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8' }
+processResources {
+    inputs.property 'mod_version', mod_version
+    filesMatching('META-INF/mods.toml') { expand mod_version: mod_version }
+    exclude '**/.gitkeep'
+    exclude '**/.cache/**'
+}
+jar {
+    from('LICENSE')
+    manifest.attributes('Implementation-Title': mod_id, 'Implementation-Version': mod_version)
+    finalizedBy 'reobfJar'
+}
+

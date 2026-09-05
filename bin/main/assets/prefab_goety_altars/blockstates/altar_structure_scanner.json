@@ -1,0 +1,1 @@
+{"variants":{"facing=north":{"model":"prefab_goety_altars:block/altar_structure_scanner"},"facing=east":{"model":"prefab_goety_altars:block/altar_structure_scanner","y":90},"facing=south":{"model":"prefab_goety_altars:block/altar_structure_scanner","y":180},"facing=west":{"model":"prefab_goety_altars:block/altar_structure_scanner","y":270}}}

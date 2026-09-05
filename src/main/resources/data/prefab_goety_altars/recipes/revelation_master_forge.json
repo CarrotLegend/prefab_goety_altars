@@ -1,0 +1,23 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "PPP",
+        "PDP",
+        "PSP"
+    ],
+    "key": {
+        "D": {
+            "tag": "goety:dark_altars"
+        },
+        "P": {
+            "tag": "goety:pedestals"
+        },
+        "S": {
+            "item": "minecraft:smithing_table"
+        }
+    },
+    "result": {
+        "item": "prefab_goety_altars:master_forge_ritual",
+        "count": 1
+    }
+}

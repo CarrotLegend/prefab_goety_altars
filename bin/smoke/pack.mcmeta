@@ -1,0 +1,6 @@
+{
+  "pack": {
+    "description": "Development-only altar framework smoke checks",
+    "pack_format": 15
+  }
+}
