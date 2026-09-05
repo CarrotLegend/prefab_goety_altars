@@ -9,3 +9,5 @@ logs/
 .classpath
 .project
 .settings/
+.vscode/
+bin/
