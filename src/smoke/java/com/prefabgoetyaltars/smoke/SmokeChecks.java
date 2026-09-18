@@ -17,7 +17,7 @@ public final class SmokeChecks {
     }
     private void loaded(FMLLoadCompleteEvent event) {
         event.enqueueWork(() -> {
-            if (ModItems.ALTARS.size() != 4) throw new IllegalStateException("Definition/registration count mismatch");
+            if (ModItems.ALTARS.size() != 2) throw new IllegalStateException("Definition/registration count mismatch");
             if (ModCreativeTabs.ALTARS.get().getIconItem().isEmpty()) throw new IllegalStateException("Missing creative tab icon");
             LogUtils.getLogger().info("ALTAR_SMOKE_COMMON_LOAD_OK: {} registered definitions and bound creative tab icon", ModItems.ALTARS.size());
             var definitions = new java.util.ArrayList<>(RitualDefinition.available());
@@ -28,7 +28,7 @@ public final class SmokeChecks {
                     LogUtils.getLogger().info("ALTAR_NATIVE_LOAD_OK: {} blocks={} blockEntities={}", definition.id(), structure.getBlocks().size(), structure.tileEntities.size());
                 } catch (java.io.IOException e) { throw new IllegalStateException(definition.structureResource(), e); }
             }
-            LogUtils.getLogger().info("ALTAR_REVELATION_PRESENT={}", com.prefabgoetyaltars.compat.revelation.RevelationCompat.isLoaded());
+            LogUtils.getLogger().info("ALTAR_OPTIONAL_MODS: revelation={} goetydelight={}", com.prefabgoetyaltars.compat.revelation.RevelationCompat.isLoaded(), com.prefabgoetyaltars.compat.goetydelight.GoetyDelightCompat.isLoaded());
             MaterialSmokeChecks.run();
             if (Boolean.getBoolean("altar.scannerClasspathCheck")) {
                 var structure = com.wuest.prefab.structures.base.Structure.CreateInstance("assets/prefab_goety_altars_smoke/scanner_fixture.gz", com.wuest.prefab.structures.base.Structure.class);

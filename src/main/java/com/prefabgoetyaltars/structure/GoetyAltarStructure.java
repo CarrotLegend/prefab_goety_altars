@@ -21,6 +21,7 @@ public class GoetyAltarStructure extends Structure {
         try {
             GoetyAltarStructure structure = Structure.CreateInstance(definition.structureResource(), GoetyAltarStructure.class);
             if (structure == null) throw new IllegalArgumentException("Empty structure");
+            OptionalStructureContentFilter.apply(structure);
             structure.validateDefinition();
             return structure;
         } catch (RuntimeException exception) {
@@ -44,11 +45,16 @@ public class GoetyAltarStructure extends Structure {
             if (tile == null || tile.getStartingPosition() == null || tile.getEntityDataTag() == null) {
                 throw new IllegalArgumentException("Invalid block entity data");
             }
+            var id = new net.minecraft.resources.ResourceLocation(tile.getEntityDomain(), tile.getEntityName());
+            if (!OptionalStructureContentFilter.isRegisteredBlockEntity(id))
+                throw new IllegalArgumentException("Unavailable block entity: " + id);
         }
         for (var entity : entities) {
-            if (entity == null || entity.getStartingPosition() == null) {
+            if (entity == null || entity.getStartingPosition() == null || entity.getEntityDataTag() == null) {
                 throw new IllegalArgumentException("Invalid entity data");
             }
+            if (!OptionalStructureContentFilter.isRegisteredEntity(entity.getEntityResource()))
+                throw new IllegalArgumentException("Unavailable entity: " + entity.getEntityResource());
         }
     }
 

@@ -59,8 +59,8 @@
   "ritual.prefab_goety_altars.sky_ritual": "Sky Ritual",
   "ritual.prefab_goety_altars.storm_ritual": "Storm Ritual",
   "ritual.prefab_goety_altars.master_forge_ritual": "Master Forge Ritual",
+  "ritual.prefab_goety_altars.culinary_ritual": "Culinary Ritual",
   "ritual.prefab_goety_altars.all_ritual": "All Rituals",
-  "ritual.prefab_goety_altars.revelation_all_ritual": "Revelation All Rituals",
   "material.prefab_goety_altars.shade_stone": "Shade Stone",
   "material.prefab_goety_altars.stone": "Stone",
   "material.prefab_goety_altars.deepslate": "Deepslate",
@@ -76,9 +76,6 @@
   "gui.prefab_goety_altars.altar_type": "Dark Altar Material",
   "gui.prefab_goety_altars.pedestal_type": "Pedestal Material",
   "gui.prefab_goety_altars.no_rituals": "No available rituals",
-  "message.prefab_goety_altars.revelation_required": "This prefab altar requires Goety Revelation.",
   "message.prefab_goety_altars.invalid_request": "Cannot build: invalid ritual or material configuration.",
-  "item.prefab_goety_altars.all_ritual": "All Ritual Altar",
-  "item.prefab_goety_altars.revelation_all_ritual": "Revelation All Ritual Altar",
-  "item.prefab_goety_altars.master_forge_ritual": "Revelation Master Forge Ritual Altar"
+  "item.prefab_goety_altars.all_ritual": "All Ritual Altar"
 }

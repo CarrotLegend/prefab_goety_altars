@@ -11,16 +11,5 @@ public final class GoetyAltarItem extends StructureItem {
         super(new Properties());
         this.prefabType = Objects.requireNonNull(prefabType);
     }
-    @Override
-    public net.minecraft.world.InteractionResult useOn(net.minecraft.world.item.context.UseOnContext context) {
-        if (!prefabType.isAvailable()) {
-            if (context.getLevel().isClientSide && context.getPlayer() != null) {
-                context.getPlayer().displayClientMessage(AltarPrefabType.missingDependencyMessage(), false);
-            }
-            return net.minecraft.world.InteractionResult.FAIL;
-        }
-        return super.useOn(context);
-    }
-
     public AltarPrefabType prefabType() { return prefabType; }
 }

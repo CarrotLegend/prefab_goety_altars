@@ -39,7 +39,7 @@ public final class GoetyAltarScreen extends GuiStructure {
         layoutWidth = Math.min(430, Math.max(304, width - 16));
         modifiedInitialXAxis = layoutWidth / 2; modifiedInitialYAxis = 117;
         imagePanelWidth = layoutWidth - 145; imagePanelHeight = 190;
-        if (hand == null || pos == null || player.getItemInHand(hand).getItem() != item || !checkDependency()) { closeScreen(); return; }
+        if (hand == null || pos == null || player.getItemInHand(hand).getItem() != item) { closeScreen(); return; }
         rituals = RitualDefinition.available();
         if (configuration == null) {
             String ritual = rituals.isEmpty() ? "unavailable" : rituals.get(0).id();
@@ -96,10 +96,6 @@ public final class GoetyAltarScreen extends GuiStructure {
         var size = RitualPreviewImages.resolve(getMinecraft().getResourceManager(), texture);
         if (size.isPresent()) { structureImageLocation = texture; imageSize = size.get(); missingImage = false; }
     }
-    private boolean checkDependency() {
-        if (item.prefabType().isAvailable()) return true;
-        player.displayClientMessage(AltarPrefabType.missingDependencyMessage(), false); clearOwnPreview(); closeScreen(); return false;
-    }
     private Component ritualText() { return rituals.isEmpty() ? Component.translatable("gui.prefab_goety_altars.no_rituals") : Component.translatable(rituals.get(ritualIndex).translationKey()).append(" >"); }
     private Component materialText(AltarMaterialVariant v) { return Component.translatable(v.translationKey()).append(" >"); }
     private Component directionText() { return Component.translatable("gui.prefab_goety_altars.direction", Component.translatable("gui.prefab_goety_altars.direction." + configuration.houseFacing.getSerializedName())); }
@@ -109,7 +105,6 @@ public final class GoetyAltarScreen extends GuiStructure {
         if (StructureRenderHandler.currentStructure instanceof GoetyAltarStructure) StructureRenderHandler.setStructure(null, null);
     }
     @Override public void buttonClicked(AbstractButton button) {
-        if (button != btnCancel && !checkDependency()) return;
         if (!button.active) return;
         if (button == ritualButton && !rituals.isEmpty()) {
             ritualIndex = (ritualIndex + 1) % rituals.size();

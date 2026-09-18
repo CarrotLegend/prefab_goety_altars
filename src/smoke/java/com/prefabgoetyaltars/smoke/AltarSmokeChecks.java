@@ -225,7 +225,7 @@ public final class AltarSmokeChecks {
                             var packet = com.prefabgoetyaltars.network.BuildAltarPacket.from(config(), hand());
                             var build = packet.getClass().getDeclaredMethod("build", net.minecraft.server.level.ServerPlayer.class);
                             build.setAccessible(true);
-                            for (String invalid : new String[]{"not_a_ritual", "master_forge_ritual"}) {
+                            for (String invalid : new String[]{"not_a_ritual"}) {
                                 var c = new GoetyAltarConfiguration(AltarPrefabType.RITUAL, invalid, current().altar(), current().pedestal(), POS, direction());
                                 build.invoke(com.prefabgoetyaltars.network.BuildAltarPacket.from(c, hand()), player);
                                 check(player.getItemInHand(hand()).getCount() == 1, "invalid/missing dependency consumes nothing");
@@ -233,15 +233,16 @@ public final class AltarSmokeChecks {
                             var valid = config();
                             var invalidMaterial = new com.prefabgoetyaltars.network.BuildAltarPacket(valid.prefabType().id(), valid.ritualId(), "invalid", valid.pedestalVariant().id(), POS, direction(), hand(), valid.WriteToCompoundTag());
                             build.invoke(invalidMaterial, player); check(player.getItemInHand(hand()).getCount() == 1, "invalid material consumes nothing");
-                            if (!com.prefabgoetyaltars.compat.revelation.RevelationCompat.isLoaded()) {
-                                for (var lockedType : new AltarPrefabType[]{AltarPrefabType.REVELATION_ALL_RITUAL, AltarPrefabType.MASTER_FORGE_RITUAL}) {
-                                player.setItemInHand(hand(), new ItemStack(item(lockedType), 2));
-                                var denied = new GoetyAltarConfiguration(lockedType, "ignored", current().altar(), current().pedestal(), POS, direction());
-                                build.invoke(com.prefabgoetyaltars.network.BuildAltarPacket.from(denied, hand()), player);
-                                check(player.getItemInHand(hand()).getCount() == 2, "forced Revelation item rejected");
+                            for (String conditional : new String[]{"master_forge_ritual", "culinary_ritual"}) {
+                                var conditionalDefinition = RitualDefinition.find(conditional).orElseThrow();
+                                if (!conditionalDefinition.isAvailable()) {
+                                    player.setItemInHand(hand(), new ItemStack(item(AltarPrefabType.RITUAL), 2));
+                                    var denied = new GoetyAltarConfiguration(AltarPrefabType.RITUAL, conditional, current().altar(), current().pedestal(), POS, direction());
+                                    build.invoke(com.prefabgoetyaltars.network.BuildAltarPacket.from(denied, hand()), player);
+                                    check(player.getItemInHand(hand()).getCount() == 2, "forced optional ritual rejected");
                                 }
-                                player.setItemInHand(hand(), new ItemStack(item(current().type()), 1));
                             }
+                            player.setItemInHand(hand(), new ItemStack(item(current().type()), 1));
                             rejectBuild = true;
                             try { build.invoke(packet, player); } finally { rejectBuild = false; }
                             check(player.getItemInHand(hand()).getCount() == 1, "Prefab rejected build consumes nothing");

@@ -75,8 +75,8 @@ public record BuildAltarPacket(String prefabType, String ritualId, String altarV
         try {
             var config = validatedConfiguration();
             definition = actualType.resolve(config.ritualId()); // Fixed types never use the client ritual ID.
-            if (!actualType.isAvailable() || !definition.isAvailable()) {
-                player.sendSystemMessage(AltarPrefabType.missingDependencyMessage());
+            if (!definition.isAvailable()) {
+                player.sendSystemMessage(Component.translatable("message.prefab_goety_altars.missing_dependency", definition.requiredModId()));
                 PrefabGoetyAltars.LOGGER.warn("Rejected ritual {}: missing required mod {}", definition.id(), definition.requiredModId()); return;
             }
             var structure = GoetyAltarStructure.load(definition);

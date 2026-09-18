@@ -6,7 +6,7 @@ license="MIT"
 modId="prefab_goety_altars"
 version="${mod_version}"
 displayName="Prefab - Goety Ritual Altars"
-description='''Four shared Prefab altar items with ritual selection, independent altar and pedestal materials, and optional Goety: Revelation compatibility.'''
+description='''Two shared Prefab altar items with conditional ritual selection and optional addon content filtering.'''
 
 [[dependencies.prefab_goety_altars]]
 modId="minecraft"
@@ -41,5 +41,12 @@ side="BOTH"
 modId="goety_revelation"
 mandatory=false
 versionRange="[2.3,)"
+ordering="AFTER"
+side="BOTH"
+
+[[dependencies.prefab_goety_altars]]
+modId="goetydelight"
+mandatory=false
+versionRange="[1.4.6,)"
 ordering="AFTER"
 side="BOTH"

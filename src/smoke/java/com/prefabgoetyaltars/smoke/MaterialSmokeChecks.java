@@ -45,9 +45,13 @@ final class MaterialSmokeChecks {
                 check(pedestal.getStateDefinition().getProperties().stream().map(p -> p.getName()).collect(java.util.stream.Collectors.toSet()).equals(Set.of("waterlogged","occupied")), "pedestal properties");
             }
             try { GoetyAltarStructure.load(RitualDefinition.named("missing_test_only", null)); throw new IllegalStateException("Missing resource accepted"); } catch (java.io.IOException expected) {}
-            if (!com.prefabgoetyaltars.compat.revelation.RevelationCompat.isLoaded()) {
-                check(!AltarPrefabType.REVELATION_ALL_RITUAL.isAvailable() && !AltarPrefabType.MASTER_FORGE_RITUAL.isAvailable(), "Revelation type gates");
-                try { GoetyAltarStructure.load(AltarPrefabType.MASTER_FORGE_RITUAL.resolve("ignored")); throw new IllegalStateException("Missing dependency accepted"); } catch (IllegalArgumentException expected) {}
+            check(AltarPrefabType.ALL_RITUAL.isAvailable(), "all ritual is always available");
+            for (String id : new String[]{"master_forge_ritual", "culinary_ritual"}) {
+                var definition = RitualDefinition.find(id).orElseThrow();
+                if (!definition.isAvailable()) {
+                    try { GoetyAltarStructure.load(definition); throw new IllegalStateException("Missing dependency accepted: " + id); }
+                    catch (IllegalArgumentException expected) {}
+                }
             }
             com.mojang.logging.LogUtils.getLogger().info("ALTAR_MATERIAL_MATRIX_OK: 121 combinations, 22 blocks/types/properties, untouched NBT/decorations, recursive BlockState NBT, missing resource/dependency gates");
         } catch (java.io.IOException e) { throw new IllegalStateException(e); }

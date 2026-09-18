@@ -59,8 +59,8 @@
   "ritual.prefab_goety_altars.sky_ritual": "天空仪式",
   "ritual.prefab_goety_altars.storm_ritual": "风暴仪式",
   "ritual.prefab_goety_altars.master_forge_ritual": "大师锻造仪式",
+  "ritual.prefab_goety_altars.culinary_ritual": "烹饪仪式",
   "ritual.prefab_goety_altars.all_ritual": "全仪式",
-  "ritual.prefab_goety_altars.revelation_all_ritual": "启示录全仪式",
   "material.prefab_goety_altars.shade_stone": "阴影石",
   "material.prefab_goety_altars.stone": "石",
   "material.prefab_goety_altars.deepslate": "深板岩",
@@ -76,9 +76,6 @@
   "gui.prefab_goety_altars.altar_type": "祭坛种类",
   "gui.prefab_goety_altars.pedestal_type": "祭坛基座种类",
   "gui.prefab_goety_altars.no_rituals": "没有可用仪式",
-  "message.prefab_goety_altars.revelation_required": "该预制祭坛需要安装“诡厄巫法启示录”才能使用。",
   "message.prefab_goety_altars.invalid_request": "无法建造：仪式或材质配置无效。",
-  "item.prefab_goety_altars.all_ritual": "全仪式祭坛",
-  "item.prefab_goety_altars.revelation_all_ritual": "启示录全仪式祭坛",
-  "item.prefab_goety_altars.master_forge_ritual": "启示录大师锻造仪式祭坛"
+  "item.prefab_goety_altars.all_ritual": "全仪式祭坛"
 }

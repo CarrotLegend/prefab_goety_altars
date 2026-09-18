@@ -16,9 +16,7 @@ public final class ModCreativeTabs {
             .title(Component.translatable("itemGroup.prefab_goety_altars"))
             .icon(() -> new ItemStack(ModRegistry.StartHouse.get()))
             .displayItems((parameters, output) -> {
-                ModItems.ALTARS.forEach(item -> {
-                    if (((com.prefabgoetyaltars.item.GoetyAltarItem) item.get()).prefabType().isAvailable()) output.accept(item.get());
-                });
+                ModItems.ALTARS.forEach(item -> output.accept(item.get()));
                 if (!FMLEnvironment.production) output.accept(ModItems.SCANNER.get());
             })
             .build());
