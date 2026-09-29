@@ -5,7 +5,7 @@ import java.util.Arrays;
 public enum AltarPrefabType {
     RITUAL("ritual_altar", null),
     ALL_RITUAL("all_ritual", RitualDefinition.named("all_ritual", 
-            new net.minecraft.resources.ResourceLocation(com.prefabgoetyaltars.PrefabGoetyAltars.MOD_ID, "textures/gui/structures/all_ritual.png"), null));
+            net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(com.prefabgoetyaltars.PrefabGoetyAltars.MOD_ID, "textures/gui/structures/all_ritual.png"), null));
 
     private final String id;
     private final RitualDefinition fixedRitual;

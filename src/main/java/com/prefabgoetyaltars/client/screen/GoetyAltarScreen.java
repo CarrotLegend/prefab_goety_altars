@@ -2,13 +2,13 @@ package com.prefabgoetyaltars.client.screen;
 
 import com.prefabgoetyaltars.PrefabGoetyAltars;
 import com.prefabgoetyaltars.client.RitualPreviewImages;
-import com.wuest.prefab.gui.GuiUtils;
+import com.prefab.gui.GuiUtils;
 import com.prefabgoetyaltars.item.GoetyAltarItem;
 import com.prefabgoetyaltars.network.BuildAltarPacket;
 import com.prefabgoetyaltars.network.ModNetwork;
 import com.prefabgoetyaltars.structure.*;
-import com.wuest.prefab.structures.gui.GuiStructure;
-import com.wuest.prefab.structures.render.StructureRenderHandler;
+import com.prefab.structures.gui.GuiStructure;
+import com.prefab.structures.render.StructureRenderHandler;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.components.Button;
@@ -31,7 +31,7 @@ public final class GoetyAltarScreen extends GuiStructure {
 
     public GoetyAltarScreen(GoetyAltarItem item) { super("Prefab - Goety Ritual Altars"); this.item = item; }
     public void prepare(InteractionHand hand) {
-        this.hand = hand; ticksWithScreenOpen = 0; configuration = null; selectedStructure = null; ritualIndex = 0; activeDefinition = null; imageSize = null; structureImageLocation = null;
+        this.hand = hand; configuration = null; selectedStructure = null; ritualIndex = 0; activeDefinition = null; imageSize = null; structureImageLocation = null;
     }
     private GoetyAltarConfiguration config() { return (GoetyAltarConfiguration) configuration; }
     @Override protected void Initialize() {
@@ -44,8 +44,8 @@ public final class GoetyAltarScreen extends GuiStructure {
         if (configuration == null) {
             String ritual = rituals.isEmpty() ? "unavailable" : rituals.get(0).id();
             configuration = new GoetyAltarConfiguration(item.prefabType(), ritual, AltarMaterialVariant.SHADE_STONE,
-                    AltarMaterialVariant.SHADE_STONE, pos, houseFacing);
-        } else houseFacing = configuration.houseFacing;
+                    AltarMaterialVariant.SHADE_STONE, pos, structureFacing);
+        } else structureFacing = config().houseFacing;
         ritualIndex = 0;
         for (int i = 0; i < rituals.size(); i++) if (rituals.get(i).id().equals(config().ritualId())) ritualIndex = i;
         var xy = getAdjustedXYValue(); int x = xy.getFirst(), y = xy.getSecond();
@@ -70,7 +70,7 @@ public final class GoetyAltarScreen extends GuiStructure {
         refreshStructure();
     }
     private void update(String ritual, AltarMaterialVariant altar, AltarMaterialVariant pedestal) {
-        configuration = new GoetyAltarConfiguration(item.prefabType(), ritual, altar, pedestal, configuration.pos, configuration.houseFacing);
+        configuration = new GoetyAltarConfiguration(item.prefabType(), ritual, altar, pedestal, configuration.pos, config().houseFacing);
         refreshStructure();
     }
     private void refreshStructure() {
@@ -98,7 +98,7 @@ public final class GoetyAltarScreen extends GuiStructure {
     }
     private Component ritualText() { return rituals.isEmpty() ? Component.translatable("gui.prefab_goety_altars.no_rituals") : Component.translatable(rituals.get(ritualIndex).translationKey()).append(" >"); }
     private Component materialText(AltarMaterialVariant v) { return Component.translatable(v.translationKey()).append(" >"); }
-    private Component directionText() { return Component.translatable("gui.prefab_goety_altars.direction", Component.translatable("gui.prefab_goety_altars.direction." + configuration.houseFacing.getSerializedName())); }
+    private Component directionText() { return Component.translatable("gui.prefab_goety_altars.direction", Component.translatable("gui.prefab_goety_altars.direction." + config().houseFacing.getSerializedName())); }
     @Override public Component getTitle() { return Component.translatable(item.prefabType().translationKey()); }
     @Override public Component getNarrationMessage() { return getTitle(); }
     private void clearOwnPreview() {
@@ -117,19 +117,19 @@ public final class GoetyAltarScreen extends GuiStructure {
             update(config().ritualId(), config().altarVariant(), config().pedestalVariant().next());
             pedestalButton.setMessage(materialText(config().pedestalVariant()));
         } else if (button == directionButton) {
-            houseFacing = config().houseFacing.getClockWise(); configuration.houseFacing = houseFacing;
+            structureFacing = config().houseFacing.getClockWise(); config().houseFacing = structureFacing;
             refreshStructure(); directionButton.setMessage(directionText());
         } else if (button == btnCancel) { clearOwnPreview(); closeScreen(); }
         else if (button == btnBuild && btnBuild.active && player.getItemInHand(hand).getItem() == item) {
-            ModNetwork.CHANNEL.sendToServer(BuildAltarPacket.from(config(), hand)); btnBuild.active = false; clearOwnPreview(); closeScreen();
+            ModNetwork.sendToServer(BuildAltarPacket.from(config(), hand)); btnBuild.active = false; clearOwnPreview(); closeScreen();
         } else if (button == btnVisualize && btnVisualize.active) performPreview();
     }
     @Override protected void preButtonRender(GuiGraphics g, int x, int y, int mouseX, int mouseY, float tick) {
         if (imageGeneration != RitualPreviewImages.generation()) refreshImage();
-        renderBackground(g);
+        renderBackground(g, mouseX, mouseY, tick);
         drawControlLeftPanel(g, x + 2, y + 10, 185, imagePanelHeight);
         drawControlRightPanel(g, x + 136, y + 10, imagePanelWidth, imagePanelHeight);
-        if (activeDefinition != null) drawSplitString(g, Component.translatable(activeDefinition.translationKey()).getString(), x + 144, y + 17, imagePanelWidth - 16);
+        if (activeDefinition != null) drawSplitString(g, Component.translatable(activeDefinition.translationKey()).getString(), x + 144, y + 17, imagePanelWidth - 16, textColor);
         if (selectedStructure != null && structureImageLocation != null && imageSize != null) {
             var fitted = imageSize.fit(imagePanelWidth - 16, 108);
             shownImageWidth = fitted.width(); shownImageHeight = fitted.height();
@@ -140,12 +140,12 @@ public final class GoetyAltarScreen extends GuiStructure {
         }
     }
     @Override protected void postButtonRender(GuiGraphics g, int x, int y, int mouseX, int mouseY, float tick) {
-        drawSplitString(g, getTitle().getString(), x + 8, y + 17, 120);
+        drawSplitString(g, getTitle().getString(), x + 8, y + 17, 120, textColor);
         if (item.prefabType() == AltarPrefabType.RITUAL) drawString(g, Component.translatable("gui.prefab_goety_altars.ritual_type").getString(), x + 8, y + 35, textColor);
         drawString(g, Component.translatable("gui.prefab_goety_altars.altar_type").getString(), x + 8, y + optionTop, textColor);
         drawString(g, Component.translatable("gui.prefab_goety_altars.pedestal_type").getString(), x + 8, y + optionTop + 45, textColor);
         if (selectedStructure == null || missingImage) drawSplitString(g, Component.translatable(selectedStructure == null
                 ? "gui.prefab_goety_altars.missing_structure" : "gui.prefab_goety_altars.missing_image").getString(),
-                x + 144, y + 40, imagePanelWidth - 16);
+                x + 144, y + 40, imagePanelWidth - 16, textColor);
     }
 }

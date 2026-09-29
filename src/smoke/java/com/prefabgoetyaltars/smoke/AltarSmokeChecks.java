@@ -5,8 +5,8 @@ import com.mojang.logging.LogUtils;
 import com.prefabgoetyaltars.client.screen.GoetyAltarScreen;
 import com.prefabgoetyaltars.registry.ModItems;
 import com.prefabgoetyaltars.structure.*;
-import com.wuest.prefab.structures.gui.GuiStructure;
-import com.wuest.prefab.structures.render.StructureRenderHandler;
+import com.prefab.structures.gui.GuiStructure;
+import com.prefab.structures.render.StructureRenderHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.core.*;
@@ -49,7 +49,7 @@ public final class AltarSmokeChecks {
         }
         for (var type : AltarPrefabType.values()) if (type != AltarPrefabType.RITUAL && type.isAvailable())
             for (int n = 0; n < 4; n++) CASES.add(new Case(type, "", DIRECTIONS[n], ALTARS[n], PEDESTALS[n]));
-        net.minecraftforge.common.MinecraftForge.EVENT_BUS.addListener((net.minecraftforge.event.level.BlockEvent.BreakEvent event) -> {
+        net.neoforged.neoforge.common.MinecraftForge.EVENT_BUS.addListener((net.neoforged.neoforge.event.level.BlockEvent.BreakEvent event) -> {
             if (rejectBuild) event.setCanceled(true);
         });
         var settings = new LevelSettings("Altar integration", GameType.CREATIVE, false, Difficulty.PEACEFUL, true,
@@ -101,10 +101,10 @@ public final class AltarSmokeChecks {
         previewStates.clear();
         for (var block : structure.getBlocks()) capture(block, structure);
     }
-    private static void capture(com.wuest.prefab.structures.base.BuildBlock block, GoetyAltarStructure structure) {
+    private static void capture(com.prefab.structures.base.BuildBlock block, GoetyAltarStructure structure) {
         if (AltarMaterialVariant.isAltar(block.getResourceLocation()) || AltarMaterialVariant.isPedestal(block.getResourceLocation())) {
-            var found = net.minecraftforge.registries.ForgeRegistries.BLOCKS.getValue(block.getResourceLocation());
-            com.wuest.prefab.structures.base.BuildBlock.SetBlockState(config(), POS, block, found, found.defaultBlockState(), structure.getClearSpace().getShape().getDirection());
+            var found = net.neoforged.neoforge.registries.ForgeRegistries.BLOCKS.getValue(block.getResourceLocation());
+            com.prefab.structures.base.BuildBlock.SetBlockState(config(), POS, block, found, found.defaultBlockState(), structure.getClearSpace().getShape().getDirection());
             var pos = block.getStartingPosition().getRelativePosition(POS, structure.getClearSpace().getShape().getDirection(), direction());
             previewStates.put(pos, block.getBlockState());
         }
@@ -205,7 +205,7 @@ public final class AltarSmokeChecks {
                             // This delayed check compares all other properties and the exact block ID.
                             var lit = net.minecraft.world.level.block.state.properties.BlockStateProperties.LIT;
                             if (expectedState.hasProperty(lit) && actualState.hasProperty(lit)
-                                    && AltarMaterialVariant.isAltar(net.minecraftforge.registries.ForgeRegistries.BLOCKS.getKey(expectedState.getBlock()))) {
+                                    && AltarMaterialVariant.isAltar(net.neoforged.neoforge.registries.ForgeRegistries.BLOCKS.getKey(expectedState.getBlock()))) {
                                 if (!expectedState.getValue(lit).equals(actualState.getValue(lit)))
                                     LogUtils.getLogger().info("ALTAR_NATIVE_LIT_UPDATE: {} {} -> {}", entry.getKey(), expectedState.getValue(lit), actualState.getValue(lit));
                                 expectedState = expectedState.setValue(lit, actualState.getValue(lit));

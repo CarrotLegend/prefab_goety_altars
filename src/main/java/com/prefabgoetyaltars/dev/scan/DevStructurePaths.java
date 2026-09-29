@@ -1,7 +1,7 @@
 package com.prefabgoetyaltars.dev.scan;
 
 import com.prefabgoetyaltars.PrefabGoetyAltars;
-import net.minecraftforge.fml.loading.FMLPaths;
+import net.neoforged.fml.loading.FMLPaths;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;

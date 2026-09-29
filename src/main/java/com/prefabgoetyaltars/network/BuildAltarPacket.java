@@ -6,18 +6,21 @@ import com.prefabgoetyaltars.structure.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.network.NetworkEvent;
 import java.io.IOException;
 import java.util.Objects;
-import java.util.function.Supplier;
 
 public record BuildAltarPacket(String prefabType, String ritualId, String altarVariant, String pedestalVariant,
-                                BlockPos pos, Direction facing, InteractionHand hand, CompoundTag configuration) {
+                                BlockPos pos, Direction facing, InteractionHand hand, CompoundTag configuration) implements CustomPacketPayload {
+    public static final Type<BuildAltarPacket> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(PrefabGoetyAltars.MOD_ID, "build_altar"));
+    public static final StreamCodec<RegistryFriendlyByteBuf, BuildAltarPacket> STREAM_CODEC = StreamCodec.ofMember(BuildAltarPacket::write, BuildAltarPacket::decode);
     public BuildAltarPacket {
         Objects.requireNonNull(prefabType); Objects.requireNonNull(ritualId); Objects.requireNonNull(altarVariant);
         Objects.requireNonNull(pedestalVariant); Objects.requireNonNull(facing); Objects.requireNonNull(hand);
@@ -27,12 +30,12 @@ public record BuildAltarPacket(String prefabType, String ritualId, String altarV
         return new BuildAltarPacket(config.prefabType().id(), config.ritualId(), config.altarVariant().id(),
                 config.pedestalVariant().id(), config.pos, config.houseFacing, hand, config.WriteToCompoundTag());
     }
-    public static void encode(BuildAltarPacket p, FriendlyByteBuf b) {
-        b.writeUtf(p.prefabType, 64); b.writeUtf(p.ritualId, 128); b.writeUtf(p.altarVariant, 64); b.writeUtf(p.pedestalVariant, 64);
-        b.writeBlockPos(p.pos); b.writeUtf(p.facing.getSerializedName(), 16);
-        b.writeUtf(p.hand == InteractionHand.MAIN_HAND ? "main_hand" : "off_hand", 16); b.writeNbt(p.configuration);
+    private void write(RegistryFriendlyByteBuf b) {
+        b.writeUtf(prefabType, 64); b.writeUtf(ritualId, 128); b.writeUtf(altarVariant, 64); b.writeUtf(pedestalVariant, 64);
+        b.writeBlockPos(pos); b.writeUtf(facing.getSerializedName(), 16);
+        b.writeUtf(hand == InteractionHand.MAIN_HAND ? "main_hand" : "off_hand", 16); b.writeNbt(configuration);
     }
-    public static BuildAltarPacket decode(FriendlyByteBuf b) {
+    private static BuildAltarPacket decode(RegistryFriendlyByteBuf b) {
         String type = b.readUtf(64), ritual = b.readUtf(128), altar = b.readUtf(64), pedestal = b.readUtf(64);
         BlockPos pos = b.readBlockPos(); Direction direction = Direction.byName(b.readUtf(16));
         if (direction == null || !direction.getAxis().isHorizontal()) throw new IllegalArgumentException("Invalid direction");
@@ -55,10 +58,9 @@ public record BuildAltarPacket(String prefabType, String ritualId, String altarV
     public boolean matchesHeldItem(ItemStack stack) {
         return !stack.isEmpty() && stack.getItem() instanceof GoetyAltarItem item && item.prefabType().id().equals(prefabType);
     }
-    public static void handle(BuildAltarPacket packet, Supplier<NetworkEvent.Context> supplier) {
-        var context = supplier.get();
-        try { if (context.getSender() != null) packet.build(context.getSender()); }
-        finally { context.setPacketHandled(true); }
+    @Override public Type<? extends CustomPacketPayload> type() { return TYPE; }
+    public static void handle(BuildAltarPacket packet, net.neoforged.neoforge.network.handling.IPayloadContext context) {
+        context.enqueueWork(() -> { if (context.player() instanceof ServerPlayer player) packet.build(player); });
     }
     private void build(ServerPlayer player) {
         if (!player.isAlive() || player.isSpectator() || !player.getAbilities().mayBuild) return;
@@ -70,7 +72,7 @@ public record BuildAltarPacket(String prefabType, String ritualId, String altarV
         var actualType = ((GoetyAltarItem) player.getItemInHand(hand).getItem()).prefabType();
         var world = player.serverLevel();
         if (!world.hasChunkAt(pos) || world.isOutsideBuildHeight(pos) || !world.getWorldBorder().isWithinBounds(pos)
-                || !world.mayInteract(player, pos) || !player.canReach(pos, 1.0)) return;
+                || !world.mayInteract(player, pos) || player.distanceToSqr(pos.getCenter()) > 64.0) return;
         RitualDefinition definition = null;
         try {
             var config = validatedConfiguration();

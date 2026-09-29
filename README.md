@@ -1,17 +1,20 @@
 # Prefab - Goety Ritual Altars
 
-Minecraft 1.20.1 / Forge 47.4.20 / Java 17，modid `prefab_goety_altars`。
+Minecraft 1.21.1 / NeoForge 21.1.214 / Java 21，modid `prefab_goety_altars`，版本 `1.0.3`。
 
-## 两个祭坛物品
+## 内容
+
+项目注册三个物品：
 
 | Registry ID | 行为 |
 |---|---|
 | `ritual_altar` | 选择具体仪式、祭坛材质、基座材质和方向 |
 | `all_ritual` | 固定加载 `all_ritual.gz`，只选择两种材质和方向 |
+| `altar_structure_scanner` | 打开开发用扫描界面并调用 Prefab 原生扫描导出 |
 
-两个物品均通过 `DeferredRegister` 注册并继续使用 Prefab `StructureItem`、原生 Preview 和本模组 `BuildAltarPacket`。网络协议为 4，旧四物品客户端不能连接。成功仅扣实际交互手一件，失败不扣。
+同时注册 `altar_structure_scanner` 方块、同 ID 方块实体，以及 `altars` 创造标签页。祭坛物品继续继承 Prefab `StructureItem`，预览和建造使用 Prefab 1.0.9 的原生结构 API。客户端到服务端通信已迁移为 NeoForge payload；协议版本为 5，旧版客户端不能连接。
 
-`ritual_altar` 的固定顺序为 14 个 Goety 本体仪式，然后是条件选项：
+`ritual_altar` 的固定顺序为 14 个 Goety 本体仪式，然后按已安装模组追加条件选项：
 
 ```text
 adept_nether_ritual
@@ -28,39 +31,37 @@ overgrown_ritual
 sabbath_ritual
 sky_ritual
 storm_ritual
-master_forge_ritual   （需要 goety_revelation）
-culinary_ritual        （需要 goetydelight）
+master_forge_ritual   （休眠兼容，等待 goety_revelation 的 1.21.1 移植）
+culinary_ritual        （需要 goetydelight 1.4.7 或更高版本）
 ```
 
-GUI 只使用 `RitualDefinition.available()`，因此未安装的条件仪式不会出现。服务端重新验证定义与依赖，伪造请求不能绕过。大师锻造和烹饪仪式只是选项，不注册独立物品或配方。
+GUI 和服务端都会重新检查条件仪式的依赖。`all_ritual` 始终可用；加载独立结构实例后，会过滤当前未安装的可选附属模组方块和对应方块实体，再执行材质转换。源 `.gz` 和 NBT 不会被改写。
 
-## 可选模组
+## 依赖
 
-Goety Revelation 仍为可选依赖。Goety's Delight 的真实 modid 已从 1.4.6 jar 元数据确认是 `goetydelight`，声明范围为 `[1.4.6,)`。代码不引用两个附属模组的 Java 类。
+- NeoForge 21.1.214
+- Prefab NeoForge 1.0.9 或更高版本
+- Goety NeoForge 3.1.5.1 或更高版本
+- Goety's Delight NeoForge 1.4.7 或更高版本（可选，modid `goetydelight`）
 
-`all_ritual.gz` 是唯一全仪式结构，并始终可用。加载出的独立结构实例会过滤缺失附属模组的内容：
-
-- 无 Goety's Delight：删除 `shade_stove`、`cursed_ingot_pot` 及相同相对位置的两个 BlockEntity。
-- 无 Goety Revelation：删除 `runestone_engraved_table`。
-- 两者都有：保留全部内容。
-
-过滤递归处理 `BuildBlock.getSubBlock()`，只允许上述两个 namespace 因对应模组缺失而被删除。未知方块、已安装模组仍缺失的注册项、错误 BlockEntity 或实体仍会拒绝加载。源 `.gz` 和 NBT 不会被改写。过滤在材质转换前完成，因此 11×11 祭坛/基座材质选择保持原行为。
+Goety Revelation 当前没有 Minecraft 1.21.1 发布物，因此不写入 `neoforge.mods.toml`。相关定义、namespace 过滤和 `master_forge_ritual` 资源保留为休眠兼容代码；在该模组未来提供 1.21.1 版本前不会进入可用仪式列表。
 
 ## 资源与配方
 
-祭坛物品模型和配方各只有：
+17 份 Prefab 结构位于 `assets/prefab_goety_altars/structures/`。物品模型、纹理、建筑预览图和语言文件沿用原路径。两份 1.21.1 配方位于单数目录 `data/prefab_goety_altars/recipe/`：
 
 ```text
 ritual_altar.json
 all_ritual.json
 ```
 
-`master_forge_ritual.gz/.png`、`culinary_ritual.gz/.png` 保留为轮换选项；`all_ritual.gz/.png` 为固定全仪式资源。祭坛扫描器及其资源保持不变。
+扫描器优先将结构导出到可识别的源码资源目录；普通游戏环境回退到游戏目录下的 `prefab_goety_altars_exports/`。
 
 ## 构建
 
 ```bat
-gradlew.bat clean build -x test
+gradlew.bat clean compileJava
+gradlew.bat build -x test
 ```
 
-本轮按用户要求不运行 JUnit、smoke、客户端或服务端测试。游戏内兼容组合由用户自行验证。
+本次迁移按要求不运行 `runClient`、`runServer`、JUnit 或游戏内 smoke。游戏内放置、预览、扫描和旧世界加载由用户验证。

@@ -7,12 +7,13 @@ import com.prefabgoetyaltars.network.OpenAltarScannerPacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RenderLevelStageEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.common.EventBusSubscriber;
 
-@Mod.EventBusSubscriber(modid = PrefabGoetyAltars.MOD_ID, value = Dist.CLIENT)
+@EventBusSubscriber(modid = PrefabGoetyAltars.MOD_ID, value = Dist.CLIENT)
 public final class ScannerClient {
     public static void open(OpenAltarScannerPacket packet) {
         var screen = new AltarStructureScannerScreen(packet.pos(), AltarStructureScannerConfig.fromTag(packet.config()));

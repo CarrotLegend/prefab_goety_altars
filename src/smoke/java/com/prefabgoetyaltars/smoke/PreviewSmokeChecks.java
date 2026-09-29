@@ -3,7 +3,7 @@ package com.prefabgoetyaltars.smoke;
 import com.prefabgoetyaltars.client.RitualPreviewImages;
 import com.prefabgoetyaltars.client.screen.GoetyAltarScreen;
 import com.prefabgoetyaltars.structure.*;
-import com.wuest.prefab.structures.gui.GuiStructure;
+import com.prefab.structures.gui.GuiStructure;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.resources.ResourceLocation;
@@ -27,18 +27,18 @@ final class PreviewSmokeChecks {
     static void openPrefabReference(GoetyAltarScreen screen) {
         var mc = Minecraft.getInstance(); altarScreen = screen;
         referenceMain = mc.player.getMainHandItem(); referenceOff = mc.player.getOffhandItem();
-        var referenceItem = net.minecraftforge.registries.ForgeRegistries.ITEMS.getValues().stream()
-                .filter(i -> i instanceof com.wuest.prefab.structures.items.ItemBasicStructure basic
+        var referenceItem = net.neoforged.neoforge.registries.ForgeRegistries.ITEMS.getValues().stream()
+                .filter(i -> i instanceof com.prefab.structures.items.ItemBasicStructure basic
                         && basic.structureType.getBaseOption().getSpecificOptions().size() > 1).findFirst().orElseThrow();
         mc.player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, new net.minecraft.world.item.ItemStack(referenceItem));
         mc.player.setItemInHand(net.minecraft.world.InteractionHand.OFF_HAND, net.minecraft.world.item.ItemStack.EMPTY);
-        var reference = new com.wuest.prefab.structures.gui.GuiBasicStructure();
+        var reference = new com.prefab.structures.gui.GuiBasicStructure();
         reference.pos = new net.minecraft.core.BlockPos(8,80,8); mc.setScreen(reference);
-        com.mojang.logging.LogUtils.getLogger().info("PREFAB_NATIVE_REFERENCE_OPEN: {}", net.minecraftforge.registries.ForgeRegistries.ITEMS.getKey(referenceItem));
+        com.mojang.logging.LogUtils.getLogger().info("PREFAB_NATIVE_REFERENCE_OPEN: {}", net.neoforged.neoforge.registries.ForgeRegistries.ITEMS.getKey(referenceItem));
     }
     static GoetyAltarScreen finishPrefabReference() throws Exception {
         var mc = Minecraft.getInstance();
-        check(mc.screen instanceof com.wuest.prefab.structures.gui.GuiBasicStructure, "real Prefab reference screen");
+        check(mc.screen instanceof com.prefab.structures.gui.GuiBasicStructure, "real Prefab reference screen");
         try (var screenshot = net.minecraft.client.Screenshot.takeScreenshot(mc.getMainRenderTarget())) {
             screenshot.writeToFile(java.nio.file.Path.of(System.getProperty("altar.smokeProject"), ".cache", "native-gui-prefab-reference.png"));
         }
@@ -52,11 +52,11 @@ final class PreviewSmokeChecks {
         var mc = Minecraft.getInstance();
         for (String name : new String[]{"ritualButton", "altarButton", "pedestalButton", "directionButton"}) {
             var widget = get(screen, GoetyAltarScreen.class, name);
-            check(widget == null || widget instanceof com.wuest.prefab.gui.controls.ExtendedButton, "native option button " + name);
+            check(widget == null || widget instanceof com.prefab.gui.controls.ExtendedButton, "native option button " + name);
         }
-        check(get(screen, GuiStructure.class, "btnVisualize") instanceof com.wuest.prefab.gui.controls.CustomButton, "native Preview");
-        check(get(screen, GuiStructure.class, "btnBuild") instanceof com.wuest.prefab.gui.controls.CustomButton, "native Build");
-        check(get(screen, GuiStructure.class, "btnCancel") instanceof com.wuest.prefab.gui.controls.ExtendedButton, "native Cancel");
+        check(get(screen, GuiStructure.class, "btnVisualize") instanceof com.prefab.gui.controls.CustomButton, "native Preview");
+        check(get(screen, GuiStructure.class, "btnBuild") instanceof com.prefab.gui.controls.CustomButton, "native Build");
+        check(get(screen, GuiStructure.class, "btnCancel") instanceof com.prefab.gui.controls.ExtendedButton, "native Cancel");
         var size = new RitualPreviewImages.Size(2560, 1494);
         for (int[] box : new int[][]{{120,118},{394,220},{640,360},{100,300}}) {
             var fitted = size.fit(box[0], box[1]);

@@ -1,17 +1,36 @@
 package com.prefabgoetyaltars.structure;
 
-import com.wuest.prefab.structures.base.BuildBlock;
-import com.wuest.prefab.structures.base.Structure;
-import com.wuest.prefab.structures.config.StructureConfiguration;
-import com.wuest.prefab.structures.events.StructureEventHandler;
+import com.prefab.PrefabBase;
+import com.prefab.structures.base.BuildBlock;
+import com.prefab.structures.base.BuildProperty;
+import com.prefab.structures.base.Structure;
+import com.prefab.structures.config.StructureConfiguration;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import java.io.IOException;
+import java.util.IdentityHashMap;
+import java.util.Map;
 
 public class GoetyAltarStructure extends Structure {
     private transient boolean mainBuildCompleted;
+    private transient Map<BuildBlock, OriginalWaterState> originalWaterStates = new IdentityHashMap<>();
+
+    private record OriginalWaterState(BuildProperty property, String propertyValue, BuildProperty addedProperty,
+                                      String stateData, BlockState cachedState) {
+        void restore(BuildBlock block) {
+            if (addedProperty != null) block.getProperties().remove(addedProperty);
+            if (property != null) property.setValue(propertyValue);
+            block.setBlockStateData(stateData);
+            block.setBlockState(cachedState);
+        }
+    }
 
     public static GoetyAltarStructure load(RitualDefinition definition) throws IOException {
         if (!definition.isAvailable()) throw new IllegalArgumentException("Missing required mod: " + definition.requiredModId());
@@ -45,7 +64,7 @@ public class GoetyAltarStructure extends Structure {
             if (tile == null || tile.getStartingPosition() == null || tile.getEntityDataTag() == null) {
                 throw new IllegalArgumentException("Invalid block entity data");
             }
-            var id = new net.minecraft.resources.ResourceLocation(tile.getEntityDomain(), tile.getEntityName());
+            var id = net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(tile.getEntityDomain(), tile.getEntityName());
             if (!OptionalStructureContentFilter.isRegisteredBlockEntity(id))
                 throw new IllegalArgumentException("Unavailable block entity: " + id);
         }
@@ -60,7 +79,7 @@ public class GoetyAltarStructure extends Structure {
 
     private static void validateBlock(BuildBlock block) {
         if (block == null || block.getStartingPosition() == null || block.getProperties() == null
-                || block.getResourceLocation() == null || !ForgeRegistries.BLOCKS.containsKey(block.getResourceLocation())) {
+                || block.getResourceLocation() == null || !BuiltInRegistries.BLOCK.containsKey(block.getResourceLocation())) {
             throw new IllegalArgumentException("Invalid or unavailable structure block");
         }
         if (block.getSubBlock() != null) validateBlock(block.getSubBlock());
@@ -100,18 +119,69 @@ public class GoetyAltarStructure extends Structure {
     }
 
     @Override
+    protected Boolean WaterReplacedWithCobbleStone(StructureConfiguration configuration, BuildBlock buildBlock,
+            Level level, BlockPos originalPos, Block block, BlockState blockState, Player player) {
+        var id = buildBlock.getResourceLocation();
+        if (id == null || !id.getNamespace().equals("goety") || !id.getPath().equals("dark_altar")
+                || !level.dimensionType().ultraWarm() || !blockState.hasProperty(BlockStateProperties.WATERLOGGED)) {
+            return super.WaterReplacedWithCobbleStone(configuration, buildBlock, level, originalPos, block, blockState, player);
+        }
+
+        BuildProperty waterProperty = buildBlock.getProperty(BlockStateProperties.WATERLOGGED.getName());
+        String stateData = buildBlock.getBlockStateData();
+        BlockState taggedState = stateData.isEmpty() ? null : buildBlock.getBlockStateFromDataTag();
+        if (taggedState != null && taggedState.getBlock() != block) {
+            return super.WaterReplacedWithCobbleStone(configuration, buildBlock, level, originalPos, block, blockState, player);
+        }
+        boolean waterlogged = taggedState != null
+                ? taggedState.getValue(BlockStateProperties.WATERLOGGED)
+                : waterProperty != null ? Boolean.parseBoolean(waterProperty.getValue())
+                : blockState.getValue(BlockStateProperties.WATERLOGGED);
+        boolean propertyIsWet = waterProperty != null && Boolean.parseBoolean(waterProperty.getValue());
+        if (waterlogged || propertyIsWet) {
+            BuildProperty addedProperty = null;
+            originalWaterStates.putIfAbsent(buildBlock, new OriginalWaterState(waterProperty,
+                    waterProperty == null ? null : waterProperty.getValue(), null, stateData, buildBlock.getBlockState()));
+            if (propertyIsWet) {
+                waterProperty.setValue("false");
+            } else if (waterlogged && taggedState == null && waterProperty == null) {
+                addedProperty = new BuildProperty();
+                addedProperty.setName(BlockStateProperties.WATERLOGGED.getName());
+                addedProperty.setValue("false");
+                buildBlock.getProperties().add(addedProperty);
+            }
+            if (taggedState != null && waterlogged) {
+                CompoundTag tag = buildBlock.getBlockStateDataTag().copy();
+                CompoundTag properties = tag.getCompound("Properties");
+                properties.putString(BlockStateProperties.WATERLOGGED.getName(), "false");
+                tag.put("Properties", properties);
+                buildBlock.setBlockStateData(tag);
+            }
+            if (addedProperty != null) {
+                OriginalWaterState original = originalWaterStates.get(buildBlock);
+                originalWaterStates.put(buildBlock, new OriginalWaterState(original.property(), original.propertyValue(),
+                        addedProperty, original.stateData(), original.cachedState()));
+            }
+        }
+        return super.WaterReplacedWithCobbleStone(configuration, buildBlock, level, originalPos, block, blockState, player);
+    }
+
+    @Override
     public boolean BuildStructure(StructureConfiguration configuration, ServerLevel world, BlockPos originalPos, Player player) {
         mainBuildCompleted = false;
+        originalWaterStates = new IdentityHashMap<>();
         boolean success = false;
         try {
             success = super.BuildStructure(configuration, world, originalPos, player) && mainBuildCompleted;
             return success;
         } finally {
+            originalWaterStates.forEach((block, original) -> original.restore(block));
+            originalWaterStates.clear();
             if (!success) {
-                var queued = StructureEventHandler.structuresToBuild.get(player);
+                var queued = PrefabBase.structuresToBuild.get(player);
                 if (queued != null) {
                     queued.remove(this);
-                    if (queued.isEmpty()) StructureEventHandler.structuresToBuild.remove(player);
+                    if (queued.isEmpty()) PrefabBase.structuresToBuild.remove(player);
                 }
             }
         }

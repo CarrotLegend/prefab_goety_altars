@@ -1,7 +1,7 @@
 package com.prefabgoetyaltars.item;
 
 import com.prefabgoetyaltars.structure.AltarPrefabType;
-import com.wuest.prefab.structures.items.StructureItem;
+import com.prefab.structures.items.StructureItem;
 import java.util.Objects;
 
 public final class GoetyAltarItem extends StructureItem {

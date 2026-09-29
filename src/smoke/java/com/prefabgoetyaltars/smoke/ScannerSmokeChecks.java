@@ -5,7 +5,7 @@ import com.prefabgoetyaltars.client.screen.AltarStructureScannerScreen;
 import com.prefabgoetyaltars.dev.scan.*;
 import com.prefabgoetyaltars.network.*;
 import com.prefabgoetyaltars.registry.ModBlocks;
-import com.wuest.prefab.Prefab;
+import com.prefab.Prefab;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.core.BlockPos;
@@ -121,7 +121,7 @@ public final class ScannerSmokeChecks {
         player.getAbilities().flying = true; player.onUpdateAbilities();
         level.setBlockAndUpdate(POS, ModBlocks.SCANNER.get().defaultBlockState().setValue(AltarStructureScannerBlock.FACING, Direction.NORTH));
         check(AltarScannerService.accessible(player, POS) != null, "authorized scanner");
-        var nonOp = net.minecraftforge.common.util.FakePlayerFactory.get(level, new com.mojang.authlib.GameProfile(java.util.UUID.randomUUID(), "ScannerNonOp"));
+        var nonOp = net.neoforged.neoforge.common.util.FakePlayerFactory.get(level, new com.mojang.authlib.GameProfile(java.util.UUID.randomUUID(), "ScannerNonOp"));
         nonOp.setGameMode(GameType.CREATIVE); nonOp.setPos(8.5, 81, 10.5);
         check(AltarScannerService.accessible(nonOp, POS) != null, "non OP accepted");
         nonOp.setGameMode(GameType.SURVIVAL); check(AltarScannerService.accessible(nonOp, POS) != null, "non OP survival accepted");

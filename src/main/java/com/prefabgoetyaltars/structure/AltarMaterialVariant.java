@@ -12,8 +12,8 @@ public enum AltarMaterialVariant {
     private final String id;
     private final ResourceLocation altarId, pedestalId;
     AltarMaterialVariant(String id, String suffix) {
-        this.id = id; altarId = new ResourceLocation("goety", "dark_altar" + suffix);
-        pedestalId = new ResourceLocation("goety", "pedestal" + suffix);
+        this.id = id; altarId = ResourceLocation.fromNamespaceAndPath("goety", "dark_altar" + suffix);
+        pedestalId = ResourceLocation.fromNamespaceAndPath("goety", "pedestal" + suffix);
     }
     public String id() { return id; }
     public String translationKey() { return "material.prefab_goety_altars." + id; }

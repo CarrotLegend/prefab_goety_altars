@@ -7,7 +7,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.network.PacketDistributor;
+
 
 public final class AltarScannerService {
     public static final double MAX_DISTANCE_SQUARED = 16 * 16;
@@ -37,7 +37,7 @@ public final class AltarScannerService {
     public static void open(ServerPlayer player, BlockPos pos) {
         try {
             var scanner = accessible(player, pos);
-            ModNetwork.CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), new OpenAltarScannerPacket(pos, scanner.configuration().GetCompoundTag()));
+            ModNetwork.sendToPlayer(player, new OpenAltarScannerPacket(pos, scanner.configuration().GetCompoundNBT()));
         } catch (RuntimeException e) { fail(player, pos, "open", e); }
     }
 

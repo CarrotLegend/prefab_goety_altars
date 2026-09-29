@@ -5,9 +5,9 @@ import com.mojang.logging.LogUtils;
 import com.prefabgoetyaltars.registry.ModCreativeTabs;
 import com.prefabgoetyaltars.registry.ModItems;
 import com.prefabgoetyaltars.structure.*;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.event.lifecycle.FMLLoadCompleteEvent;
+import net.neoforged.fml.javafmlmod.FMLJavaModLoadingContext;
 
 @Mod(SmokeChecks.MOD_ID)
 public final class SmokeChecks {
@@ -31,7 +31,7 @@ public final class SmokeChecks {
             LogUtils.getLogger().info("ALTAR_OPTIONAL_MODS: revelation={} goetydelight={}", com.prefabgoetyaltars.compat.revelation.RevelationCompat.isLoaded(), com.prefabgoetyaltars.compat.goetydelight.GoetyDelightCompat.isLoaded());
             MaterialSmokeChecks.run();
             if (Boolean.getBoolean("altar.scannerClasspathCheck")) {
-                var structure = com.wuest.prefab.structures.base.Structure.CreateInstance("assets/prefab_goety_altars_smoke/scanner_fixture.gz", com.wuest.prefab.structures.base.Structure.class);
+                var structure = com.prefab.structures.base.Structure.CreateInstance("assets/prefab_goety_altars_smoke/scanner_fixture.gz", com.prefab.structures.base.Structure.class);
                 if (structure == null || structure.getBlocks().size() != 3 || structure.tileEntities.size() != 1) throw new IllegalStateException("Scanner classpath fixture failed");
                 LogUtils.getLogger().info("SCANNER_SMOKE_CLASSPATH_OK: native Structure.CreateInstance loaded processed fixture");
             }

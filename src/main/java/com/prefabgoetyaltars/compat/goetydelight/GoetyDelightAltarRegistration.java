@@ -8,7 +8,7 @@ import java.util.List;
 public final class GoetyDelightAltarRegistration {
     public static List<RitualDefinition> definitions() {
         return List.of(RitualDefinition.named("culinary_ritual",
-                new ResourceLocation(PrefabGoetyAltars.MOD_ID, "textures/gui/structures/culinary_ritual.png"),
+                ResourceLocation.fromNamespaceAndPath(PrefabGoetyAltars.MOD_ID, "textures/gui/structures/culinary_ritual.png"),
                 GoetyDelightCompat.MOD_ID));
     }
     private GoetyDelightAltarRegistration() {}

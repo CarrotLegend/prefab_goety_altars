@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 package com.prefabgoetyaltars.structure;
 
-import com.wuest.prefab.structures.config.StructureConfiguration;
+import com.prefab.structures.config.StructureConfiguration;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;

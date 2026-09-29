@@ -1,9 +1,8 @@
 package com.prefabgoetyaltars.dev.scan;
 
 import com.google.gson.GsonBuilder;
-import com.wuest.prefab.UppercaseEnumAdapter;
-import com.wuest.prefab.structures.base.Structure;
-import net.minecraft.core.Direction;
+
+import com.prefab.structures.base.Structure;
 import net.minecraft.server.level.ServerLevel;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -47,7 +46,7 @@ public final class PrefabStructureExport {
         try (var input = new GZIPInputStream(Files.newInputStream(file))) {
             String json = new String(input.readAllBytes(), StandardCharsets.UTF_8);
             var gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation()
-                    .registerTypeAdapter(Direction.class, new UppercaseEnumAdapter()).create();
+                    .create();
             Structure structure = gson.fromJson(json, Structure.class);
             if (structure == null || structure.getClearSpace() == null || structure.getClearSpace().getShape() == null
                     || structure.getClearSpace().getStartingPosition() == null || structure.getBlocks() == null

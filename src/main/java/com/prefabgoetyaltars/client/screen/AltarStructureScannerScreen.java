@@ -90,8 +90,8 @@ public final class AltarStructureScannerScreen extends Screen {
                 var config = draft();
                 if (scan) {
                     AltarStructureScannerConfig.normalizeName(name);
-                    ModNetwork.CHANNEL.sendToServer(new ScanAltarStructurePacket(scannerPos, config.GetCompoundTag()));
-                } else ModNetwork.CHANNEL.sendToServer(new SyncAltarScannerPacket(scannerPos, config.GetCompoundTag()));
+                    ModNetwork.sendToServer(new ScanAltarStructurePacket(scannerPos, config.GetCompoundNBT()));
+                } else ModNetwork.sendToServer(new SyncAltarScannerPacket(scannerPos, config.GetCompoundNBT()));
             } catch (IllegalArgumentException e) {
                 if (minecraft.player != null) minecraft.player.displayClientMessage(e instanceof ScannerException failure ? failure.playerMessage() : Component.translatable(PREFIX + "error.invalid_range"), false);
                 if (scan) return;
@@ -103,7 +103,7 @@ public final class AltarStructureScannerScreen extends Screen {
     @Override public void onClose() { submit(false); }
     @Override public void removed() {
         if (!submitted && canInteract()) {
-            try { ModNetwork.CHANNEL.sendToServer(new SyncAltarScannerPacket(scannerPos, draft().GetCompoundTag())); }
+            try { ModNetwork.sendToServer(new SyncAltarScannerPacket(scannerPos, draft().GetCompoundNBT())); }
             catch (IllegalArgumentException ignored) { }
         }
         submitted = true;

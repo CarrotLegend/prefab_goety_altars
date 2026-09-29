@@ -1,11 +1,11 @@
 package com.prefabgoetyaltars.smoke;
 
 import com.prefabgoetyaltars.structure.*;
-import com.wuest.prefab.structures.base.*;
+import com.prefab.structures.base.*;
 import net.minecraft.core.*;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.registries.ForgeRegistries;
 import java.util.*;
 
 /** Registry-backed tests, isolated from release sources and without world writes. */

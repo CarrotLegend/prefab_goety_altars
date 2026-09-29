@@ -1,6 +1,6 @@
 package com.prefabgoetyaltars.dev.scan;
 
-import com.wuest.prefab.config.StructureScannerConfig;
+import com.prefab.config.StructureScannerConfig;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -12,7 +12,7 @@ public final class AltarStructureScannerConfig extends StructureScannerConfig {
     public static final long MAX_VOLUME = 1_000_000;
 
     public AltarStructureScannerConfig copy() {
-        return fromTag(GetCompoundTag());
+        return fromTag(GetCompoundNBT());
     }
 
     public AltarStructureScannerConfig anchored(BlockPos pos, Direction facing) {
@@ -34,7 +34,7 @@ public final class AltarStructureScannerConfig extends StructureScannerConfig {
         int facing = tag.getInt("direction");
         if (facing < 2 || facing > 5) throw new ScannerException(ScannerException.Reason.INVALID_RANGE, "Scanner direction must be horizontal");
         var result = new AltarStructureScannerConfig();
-        result.ReadFromCompoundTag(tag);
+        result.ReadFromCompoundNBT(tag);
         result.validate();
         return result;
     }
@@ -62,5 +62,3 @@ public final class AltarStructureScannerConfig extends StructureScannerConfig {
         return name;
     }
 }
-
-

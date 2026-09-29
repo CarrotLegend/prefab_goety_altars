@@ -3,11 +3,11 @@ package com.prefabgoetyaltars.structure;
 import com.prefabgoetyaltars.PrefabGoetyAltars;
 import com.prefabgoetyaltars.compat.goetydelight.GoetyDelightCompat;
 import com.prefabgoetyaltars.compat.revelation.RevelationCompat;
-import com.wuest.prefab.structures.base.BuildBlock;
-import com.wuest.prefab.structures.base.PositionOffset;
+import com.prefab.structures.base.BuildBlock;
+import com.prefab.structures.base.PositionOffset;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.fml.ModList;
+import net.minecraft.core.registries.BuiltInRegistries;
 import java.util.*;
 import java.util.function.Predicate;
 
@@ -47,7 +47,7 @@ public final class OptionalStructureContentFilter {
             collectPositions(block, removed);
             return null;
         }
-        if (!ForgeRegistries.BLOCKS.containsKey(id))
+        if (!BuiltInRegistries.BLOCK.containsKey(id))
             throw new IllegalArgumentException("Unavailable structure block: " + id);
         if (block.getSubBlock() != null) block.setSubBlock(filterBlock(block.getSubBlock(), loaded, removed));
         return block;
@@ -64,8 +64,8 @@ public final class OptionalStructureContentFilter {
         return modId != null && !loaded.test(modId);
     }
 
-    static boolean isRegisteredEntity(ResourceLocation id) { return ForgeRegistries.ENTITY_TYPES.containsKey(id); }
-    static boolean isRegisteredBlockEntity(ResourceLocation id) { return ForgeRegistries.BLOCK_ENTITY_TYPES.containsKey(id); }
+    static boolean isRegisteredEntity(ResourceLocation id) { return BuiltInRegistries.ENTITY_TYPE.containsKey(id); }
+    static boolean isRegisteredBlockEntity(ResourceLocation id) { return BuiltInRegistries.BLOCK_ENTITY_TYPE.containsKey(id); }
 
     private record OffsetKey(int north, int south, int east, int west, int height) {
         static OffsetKey of(PositionOffset p) {

@@ -9,7 +9,7 @@ import net.minecraft.resources.ResourceLocation;
 public final class RevelationAltarRegistration {
     public static List<RitualDefinition> definitions() {
         return List.of(RitualDefinition.named("master_forge_ritual",
-                new ResourceLocation(PrefabGoetyAltars.MOD_ID, "textures/gui/structures/master_forge_ritual.png"),
+                ResourceLocation.fromNamespaceAndPath(PrefabGoetyAltars.MOD_ID, "textures/gui/structures/master_forge_ritual.png"),
                 RevelationCompat.MOD_ID));
     }
     private RevelationAltarRegistration() {}

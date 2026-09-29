@@ -2,16 +2,17 @@ package com.prefabgoetyaltars.client;
 
 import com.prefabgoetyaltars.PrefabGoetyAltars;
 import com.prefabgoetyaltars.structure.AltarPrefabType;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.data.event.GatherDataEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.data.event.GatherDataEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.common.EventBusSubscriber;
 
-@Mod.EventBusSubscriber(modid = PrefabGoetyAltars.MOD_ID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(modid = PrefabGoetyAltars.MOD_ID, value = Dist.CLIENT)
 public final class ModItemModels {
     @SubscribeEvent
     public static void gather(GatherDataEvent event) {
-        event.getGenerator().addProvider(event.includeClient(), new net.minecraftforge.client.model.generators.ModelProvider<net.minecraftforge.client.model.generators.ItemModelBuilder>(
+        event.getGenerator().addProvider(event.includeClient(), new net.neoforged.neoforge.client.model.generators.ModelProvider<net.neoforged.neoforge.client.model.generators.ItemModelBuilder>(
                 event.getGenerator().getPackOutput(), PrefabGoetyAltars.MOD_ID, "item", OptionalTextureModel::new, event.getExistingFileHelper()) {
             @Override
             public String getName() { return "Goety altar item models"; }
@@ -29,12 +30,12 @@ public final class ModItemModels {
             }
         });
     }
-    private static final class OptionalTextureModel extends net.minecraftforge.client.model.generators.ItemModelBuilder {
-        OptionalTextureModel(net.minecraft.resources.ResourceLocation location, net.minecraftforge.common.data.ExistingFileHelper helper) {
+    private static final class OptionalTextureModel extends net.neoforged.neoforge.client.model.generators.ItemModelBuilder {
+        OptionalTextureModel(net.minecraft.resources.ResourceLocation location, net.neoforged.neoforge.common.data.ExistingFileHelper helper) {
             super(location, helper);
         }
         @Override
-        public net.minecraftforge.client.model.generators.ItemModelBuilder texture(String key, net.minecraft.resources.ResourceLocation texture) {
+        public net.neoforged.neoforge.client.model.generators.ItemModelBuilder texture(String key, net.minecraft.resources.ResourceLocation texture) {
             if (texture.getNamespace().equals(PrefabGoetyAltars.MOD_ID)
                     && java.util.Arrays.stream(AltarPrefabType.values()).anyMatch(d -> texture.getPath().equals("item/" + d.id()))) {
                 textures.put(key, texture.toString());

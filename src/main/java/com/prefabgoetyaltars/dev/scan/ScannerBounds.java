@@ -1,6 +1,6 @@
 package com.prefabgoetyaltars.dev.scan;
 
-import com.wuest.prefab.structures.base.BuildClear;
+import com.prefab.structures.base.BuildClear;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.phys.AABB;
@@ -29,7 +29,7 @@ public record ScannerBounds(BlockPos corner, BlockPos otherCorner, BuildClear cl
 
     public BlockPos min() { return new BlockPos(Math.min(corner.getX(), otherCorner.getX()), Math.min(corner.getY(), otherCorner.getY()), Math.min(corner.getZ(), otherCorner.getZ())); }
     public BlockPos max() { return new BlockPos(Math.max(corner.getX(), otherCorner.getX()), Math.max(corner.getY(), otherCorner.getY()), Math.max(corner.getZ(), otherCorner.getZ())); }
-    public AABB box() { return new AABB(min(), max().offset(1, 1, 1)); }
+    public AABB box() { var a = min(); var b = max(); return new AABB(a.getX(), a.getY(), a.getZ(), b.getX() + 1, b.getY() + 1, b.getZ() + 1); }
 
     public boolean isLoadedAndInsideWorld(ServerLevel level) {
         try { validateWorld(level); return true; }

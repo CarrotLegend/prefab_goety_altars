@@ -1,5 +1,6 @@
 package com.prefabgoetyaltars.dev.scan;
 
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerPlayer;
@@ -16,9 +17,11 @@ import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.phys.BlockHitResult;
 
 public final class AltarStructureScannerBlock extends BaseEntityBlock {
+    public static final MapCodec<AltarStructureScannerBlock> CODEC = simpleCodec(AltarStructureScannerBlock::new);
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
-    public AltarStructureScannerBlock() {
-        super(Properties.copy(Blocks.STRUCTURE_BLOCK));
+    public AltarStructureScannerBlock() { this(Properties.ofFullCopy(Blocks.STRUCTURE_BLOCK)); }
+    private AltarStructureScannerBlock(Properties properties) {
+        super(properties);
         registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH));
     }
     @Override protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) { builder.add(FACING); }
@@ -27,7 +30,8 @@ public final class AltarStructureScannerBlock extends BaseEntityBlock {
     @Override public BlockState mirror(BlockState state, Mirror mirror) { return state.rotate(mirror.getRotation(state.getValue(FACING))); }
     @Override public RenderShape getRenderShape(BlockState state) { return RenderShape.MODEL; }
     @Override public BlockEntity newBlockEntity(BlockPos pos, BlockState state) { return new AltarStructureScannerBlockEntity(pos, state); }
-    @Override public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+    @Override protected MapCodec<? extends BaseEntityBlock> codec() { return CODEC; }
+    @Override protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
         if (player instanceof ServerPlayer serverPlayer) AltarScannerService.open(serverPlayer, pos);
         return InteractionResult.sidedSuccess(level.isClientSide);
     }

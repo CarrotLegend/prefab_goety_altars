@@ -4,7 +4,7 @@ import com.prefabgoetyaltars.PrefabGoetyAltars;
 import com.prefabgoetyaltars.compat.revelation.RevelationAltarRegistration;
 import com.prefabgoetyaltars.compat.goetydelight.GoetyDelightAltarRegistration;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.fml.ModList;
+import net.neoforged.fml.ModList;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -13,7 +13,7 @@ public record RitualDefinition(String id, String translationKey, String structur
     private static final List<RitualDefinition> RITUALS = Stream.of(Stream.of(
             "adept_nether_ritual", "animation_ritual", "deep_ritual", "end_ritual", "expert_nether_ritual",
             "forge_ritual", "frost_ritual", "geoturgy_ritual", "magic_ritual", "necroturgy_ritual",
-            "overgrown_ritual", "sabbath_ritual", "sky_ritual", "storm_ritual").map(id -> named(id, new ResourceLocation(PrefabGoetyAltars.MOD_ID, "textures/gui/structures/" + id + ".png"), null)),
+            "overgrown_ritual", "sabbath_ritual", "sky_ritual", "storm_ritual").map(id -> named(id, ResourceLocation.fromNamespaceAndPath(PrefabGoetyAltars.MOD_ID, "textures/gui/structures/" + id + ".png"), null)),
             RevelationAltarRegistration.definitions().stream(),
             GoetyDelightAltarRegistration.definitions().stream()).flatMap(java.util.function.Function.identity()).toList();
 

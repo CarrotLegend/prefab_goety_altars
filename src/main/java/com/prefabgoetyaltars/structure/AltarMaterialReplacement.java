@@ -1,12 +1,12 @@
 package com.prefabgoetyaltars.structure;
 
-import com.wuest.prefab.structures.base.BuildBlock;
-import com.wuest.prefab.structures.base.BuildProperty;
-import com.wuest.prefab.structures.base.Structure;
+import com.prefab.structures.base.BuildBlock;
+import com.prefab.structures.base.BuildProperty;
+import com.prefab.structures.base.Structure;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
 import java.util.ArrayList;
 
 public final class AltarMaterialReplacement {
@@ -16,9 +16,9 @@ public final class AltarMaterialReplacement {
         for (BuildBlock block : structure.getBlocks()) replace(block, altar, pedestal);
     }
     private static Block target(ResourceLocation id, String entityId) {
-        if (!ForgeRegistries.BLOCKS.containsKey(id)) throw new IllegalArgumentException("Missing material block: " + id);
-        Block block = ForgeRegistries.BLOCKS.getValue(id);
-        var type = ForgeRegistries.BLOCK_ENTITY_TYPES.getValue(new ResourceLocation("goety", entityId));
+        if (!BuiltInRegistries.BLOCK.containsKey(id)) throw new IllegalArgumentException("Missing material block: " + id);
+        Block block = BuiltInRegistries.BLOCK.get(id);
+        var type = BuiltInRegistries.BLOCK_ENTITY_TYPE.get(ResourceLocation.fromNamespaceAndPath("goety", entityId));
         if (block == null || type == null || !type.isValid(block.defaultBlockState()))
             throw new IllegalArgumentException("Incompatible material BlockEntityType: " + id);
         return block;
@@ -27,7 +27,7 @@ public final class AltarMaterialReplacement {
         Block target = AltarMaterialVariant.isAltar(source.getResourceLocation()) ? altar
                 : AltarMaterialVariant.isPedestal(source.getResourceLocation()) ? pedestal : null;
         if (target != null) {
-            ResourceLocation targetId = ForgeRegistries.BLOCKS.getKey(target);
+            ResourceLocation targetId = BuiltInRegistries.BLOCK.getKey(target);
             var properties = new ArrayList<BuildProperty>();
             for (var property : source.getProperties()) {
                 if (accepts(target, property.getName(), property.getValue())) {
